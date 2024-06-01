@@ -177,7 +177,6 @@ class WebServer {
 
         } else if (request.contains("file/")) {
           // tries to find the specified file and shows it or shows an error
-
           // take the path and clean it. try to open the file
           File file = new File(request.replace("file/", ""));
 
@@ -200,23 +199,51 @@ class WebServer {
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
+          try {
+            String num1Str = query_pairs.get("num1");
+            String num2Str = query_pairs.get("num2");
 
-          // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+            if (num1Str == null || num2Str == null) {
+              throw new IllegalArgumentException("Missing parameters");
+            }
 
-          // do math
-          Integer result = num1 * num2;
+            // extract required fields from parameters
+            Integer num1 = Integer.parseInt(query_pairs.get("num1"));
+            Integer num2 = Integer.parseInt(query_pairs.get("num2"));
 
-          // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
+            // do math
+            Integer result = num1 * num2;
 
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
+            // Generate response
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Result is: " + result);
 
+            // TODO: Include error handling here with a correct error code and
+            // a response that makes sense
+          }
+          catch (NumberFormatException e) {
+            // Handle invalid number format
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Invalid input: num1 and num2 must be integers");
+          }
+          catch (IllegalArgumentException e) {
+            // Handle missing parameters
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Missing input: both num1 and num2 are required");
+          }
+          catch (Exception e) {
+            // Handle any other unexpected errors
+            builder.append("HTTP/1.1 500 Internal Server Error\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Server error: " + e.getMessage());
+          }
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
           // check out https://docs.github.com/rest/reference/
