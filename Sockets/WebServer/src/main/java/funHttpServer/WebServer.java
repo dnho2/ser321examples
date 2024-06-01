@@ -197,9 +197,10 @@ class WebServer {
           // wrong data is given this just crashes
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+          try {
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
-          try {
+
             String num1Str = query_pairs.get("num1");
             String num2Str = query_pairs.get("num2");
 
